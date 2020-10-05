@@ -13,7 +13,7 @@ from questions.serializers import AnswerSerializer, QuestionSerializer
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
+    queryset = Question.objects.all().order_by('-created_at')
     lookup_field = "slug"
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
