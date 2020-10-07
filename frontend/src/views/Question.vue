@@ -6,14 +6,50 @@
         Posted By: <span class="author-name">{{ question.author }}</span>
       </p>
       <p>{{ question.created_at }}</p>
+      <hr />
+      <div v-if="userHasAnswered">
+        <p class="answer-added">You've written an answer!</p>
+      </div>
+      <div v-else-if="showForm">
+        <form class="card" @submit.prevent="onSubmit">
+          <div class="card-header px-3">
+            Answer the Question
+          </div>
+          <div class="card-block">
+            <textarea
+              rows="5"
+              v-model="newAnswerBody"
+              class="form-control"
+              placeholder="Share Your Knowledge"
+            ></textarea>
+          </div>
+          <div class="card-footer px-3">
+            <button type="submit" class="btn btn-sm btn-success">Submit</button>
+          </div>
+        </form>
+        <p v-if="error" class="error mt-2">{{ error }}</p>
+      </div>
+      <div v-else>
+        <button class="btn btn-sm btn-success" @click="showForm = true">
+          Share your Knowledge
+        </button>
+      </div>
+      <hr />
+    </div>
+    <div class="container">
+      <Answer v-for="(answer, index) in answers" :key="index" :answer="answer" />
     </div>
   </div>
 </template>
 
 <script>
-import { apiService } from '../common/api.service.js';
+import { apiService } from '@/common/api.service.js';
+import Answer from '@/components/Answer';
 export default {
   name: 'Question',
+  components: {
+    Answer,
+  },
   props: {
     slug: {
       type: String,
@@ -23,6 +59,11 @@ export default {
   data() {
     return {
       question: {},
+      answers: [],
+      newAnswerBody: null,
+      error: null,
+      userHasAnswered: false,
+      showForm: false,
     };
   },
   methods: {
@@ -33,12 +74,36 @@ export default {
       let endpoint = `/api/questions/${this.slug}/`;
       apiService(endpoint).then(data => {
         this.question = data;
+        this.userHasAnswered = data.user_has_answered;
         this.setPageTitle(data.content);
       });
+    },
+    getQuestionAnswers() {
+      let endpoint = `/api/questions/${this.slug}/answers/`;
+      apiService(endpoint).then(data => {
+        this.answers = data.results;
+      });
+    },
+    onSubmit() {
+      if (this.newAnswerBody) {
+        let endpoint = `/api/questions/${this.slug}/answer/`;
+        apiService(endpoint, 'POST', { body: this.newAnswerBody }).then(data => {
+          this.answers.unshift(data);
+        });
+        this.newAnswerBody = null;
+        this.showForm = false;
+        this.userHasAnswered = true;
+        if (this.error) {
+          this.error = null;
+        }
+      } else {
+        this.error = "You can't send an empty answer";
+      }
     },
   },
   created() {
     this.getQuestionData();
+    this.getQuestionAnswers();
   },
 };
 </script>
@@ -47,5 +112,13 @@ export default {
 .author-name {
   font-weight: bold;
   color: #dc3545;
+}
+.answer-added {
+  font-weight: bold;
+  color: green;
+}
+.error {
+  font-weight: bold;
+  color: red;
 }
 </style>
