@@ -37,7 +37,19 @@
       <hr />
     </div>
     <div class="container">
-      <Answer v-for="(answer, index) in answers" :key="index" :answer="answer" />
+      <Answer
+        v-for="(answer, index) in answers"
+        :key="index"
+        :answer="answer"
+        :requestUser="requestUser"
+        @delete-answer="deleteAnswer"
+      />
+    </div>
+    <div class="container my-4">
+      <p v-show="loadingAnswers">...loading</p>
+      <button v-show="next" @click="getQuestionAnswers" class="btn btn-sm btn-outline-success">
+        Load More
+      </button>
     </div>
   </div>
 </template>
@@ -64,11 +76,17 @@ export default {
       error: null,
       userHasAnswered: false,
       showForm: false,
+      next: null,
+      loadingAnswers: false,
+      requestUser: null,
     };
   },
   methods: {
     setPageTitle(title) {
       document.title = title;
+    },
+    setRequestUser() {
+      this.requestUser = window.localStorage.getItem('username');
     },
     getQuestionData() {
       let endpoint = `/api/questions/${this.slug}/`;
@@ -80,8 +98,17 @@ export default {
     },
     getQuestionAnswers() {
       let endpoint = `/api/questions/${this.slug}/answers/`;
+      if (this.next) {
+        endpoint = this.next;
+      }
       apiService(endpoint).then(data => {
-        this.answers = data.results;
+        this.answers.push(...data.results);
+        this.loadingAnswers = false;
+        if (data.next) {
+          this.next = data.next;
+        } else {
+          this.next = null;
+        }
       });
     },
     onSubmit() {
@@ -100,10 +127,21 @@ export default {
         this.error = "You can't send an empty answer";
       }
     },
+    async deleteAnswer(answer) {
+      let endpoint = `/api/answers/${answer.id}/`;
+      try {
+        await apiService(endpoint, 'DELETE');
+        this.answers = this.answers.filter((item, index) => index !== this.answers.indexOf(answer));
+        this.userHasAnswered = false;
+      } catch (e) {
+        console.log(e);
+      }
+    },
   },
   created() {
     this.getQuestionData();
     this.getQuestionAnswers();
+    this.setRequestUser();
   },
 };
 </script>
