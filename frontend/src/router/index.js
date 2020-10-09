@@ -1,10 +1,13 @@
-import { createRouter, createWebHistory } from "vue-router";
+import {
+  createRouter,
+  createWebHistory
+} from "vue-router";
 import Home from "../views/Home.vue";
 import Question from "../views/Question.vue";
 import QuestionEditor from "../views/QuestionEditor.vue";
+import AnswerEditor from "../views/AnswerEditor.vue";
 
-const routes = [
-  {
+const routes = [{
     path: "/",
     name: "Home",
     component: Home
@@ -16,10 +19,17 @@ const routes = [
     props: true
   },
   {
-    path: "/ask",
+    path: "/ask/:slug?",
     name: "QuestionEditor",
-    component: QuestionEditor
-  }
+    component: QuestionEditor,
+    props: true
+  },
+  {
+    path: "/answer/:id",
+    name: "AnswerEditor",
+    component: AnswerEditor,
+    props: true
+  },
 ];
 
 const router = createRouter({

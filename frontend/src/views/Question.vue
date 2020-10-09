@@ -2,6 +2,7 @@
   <div class="single-question mt-2">
     <div class="container">
       <h1>{{ question.content }}</h1>
+      <QuestionActions v-if="isQuestionAuthor" :slug="question.slug" />
       <p class="mb-0">
         Posted By: <span class="author-name">{{ question.author }}</span>
       </p>
@@ -57,10 +58,12 @@
 <script>
 import { apiService } from '@/common/api.service.js';
 import Answer from '@/components/Answer';
+import QuestionActions from '@/components/QuestionActions';
 export default {
   name: 'Question',
   components: {
     Answer,
+    QuestionActions,
   },
   props: {
     slug: {
@@ -80,6 +83,11 @@ export default {
       loadingAnswers: false,
       requestUser: null,
     };
+  },
+  computed: {
+    isQuestionAuthor() {
+      return this.question.author === this.requestUser;
+    },
   },
   methods: {
     setPageTitle(title) {
