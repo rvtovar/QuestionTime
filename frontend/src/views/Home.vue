@@ -18,7 +18,11 @@
       </div>
       <div class="my-4">
         <p v-show="loadingQuestions">...loading</p>
-        <button v-show="next" @click="getQuestions" class="btn btn-sm btn-outline-success">
+        <button
+          v-show="next"
+          @click="getQuestions"
+          class="btn btn-sm btn-outline-success"
+        >
           Load More
         </button>
       </div>
@@ -28,19 +32,19 @@
 
 <script>
 // @ is an alias to /src
-import { apiService } from '@/common/api.service.js';
+import { apiService } from "@/common/api.service.js";
 export default {
-  name: 'Home',
+  name: "Home",
   data() {
     return {
       questions: [],
       next: null,
-      loadingQuestions: false,
+      loadingQuestions: false
     };
   },
   methods: {
     getQuestions() {
-      let endpoint = '/api/questions/';
+      let endpoint = "/api/questions/";
       if (this.next) {
         endpoint = this.next;
       }
@@ -54,12 +58,12 @@ export default {
           this.next = null;
         }
       });
-    },
+    }
   },
   created() {
     this.getQuestions();
-    document.title = 'QuestionTime';
-  },
+    document.title = "QuestionTime";
+  }
 };
 </script>
 

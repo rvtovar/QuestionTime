@@ -10,38 +10,38 @@
 </template>
 
 <script>
-import { apiService } from '@/common/api.service.js';
+import { apiService } from "@/common/api.service.js";
 export default {
-  name: 'AnswerEditor',
+  name: "AnswerEditor",
   props: {
     id: {
       type: Number,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
       questionSlug: null,
       answerBody: null,
-      error: null,
+      error: null
     };
   },
   methods: {
     onSubmit() {
       if (this.answerBody) {
         let endpoint = `/api/answers/${this.id}/`;
-        apiService(endpoint, 'PUT', { body: this.answerBody }).then(() => {
+        apiService(endpoint, "PUT", { body: this.answerBody }).then(() => {
           this.$router.push({
-            name: 'Question',
+            name: "Question",
             params: {
-              slug: this.questionSlug,
-            },
+              slug: this.questionSlug
+            }
           });
         });
       } else {
         this.error = "You can't submit an empty answer!";
       }
-    },
+    }
   },
   async beforeRouteEnter(to, from, next) {
     let endpoint = `/api/answers/${to.params.id}/`;
@@ -51,6 +51,6 @@ export default {
     return next(vm => {
       (vm.answerBody = data.body), (vm.questionSlug = data.question_slug);
     });
-  },
+  }
 };
 </script>

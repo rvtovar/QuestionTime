@@ -6,30 +6,32 @@
     >
       Edit
     </router-link>
-    <button @click="deleteQuestion" class="btn btn-sm btn-outline-danger">Delete</button>
+    <button @click="deleteQuestion" class="btn btn-sm btn-outline-danger">
+      Delete
+    </button>
   </div>
 </template>
 
 <script>
-import { apiService } from '@/common/api.service.js';
+import { apiService } from "@/common/api.service.js";
 export default {
-  name: 'QuestionActions',
+  name: "QuestionActions",
   props: {
     slug: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   methods: {
     async deleteQuestion() {
       let endpoint = `/api/questions/${this.slug}/`;
       try {
-        await apiService(endpoint, 'DELETE');
-        this.$router.push('/');
+        await apiService(endpoint, "DELETE");
+        this.$router.push("/");
       } catch (e) {
         console.log(e);
       }
-    },
-  },
+    }
+  }
 };
 </script>

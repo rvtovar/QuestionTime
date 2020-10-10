@@ -1,6 +1,6 @@
 <template>
   <div class="single-question mt-2">
-    <div class="container">
+    <div class="container" v-if="question">
       <h1>{{ question.content }}</h1>
       <QuestionActions v-if="isQuestionAuthor" :slug="question.slug" />
       <p class="mb-0">
@@ -37,10 +37,13 @@
       </div>
       <hr />
     </div>
-    <div class="container">
+    <div v-else>
+      <h1 id="notfound">404 - Question Not Found</h1>
+    </div>
+    <div class="container" v-if="question">
       <Answer
-        v-for="(answer, index) in answers"
-        :key="index"
+        v-for="answer in answers"
+        :key="answer.id"
         :answer="answer"
         :requestUser="requestUser"
         @delete-answer="deleteAnswer"
@@ -48,7 +51,11 @@
     </div>
     <div class="container my-4">
       <p v-show="loadingAnswers">...loading</p>
-      <button v-show="next" @click="getQuestionAnswers" class="btn btn-sm btn-outline-success">
+      <button
+        v-show="next"
+        @click="getQuestionAnswers"
+        class="btn btn-sm btn-outline-success"
+      >
         Load More
       </button>
     </div>
@@ -56,20 +63,20 @@
 </template>
 
 <script>
-import { apiService } from '@/common/api.service.js';
-import Answer from '@/components/Answer';
-import QuestionActions from '@/components/QuestionActions';
+import { apiService } from "@/common/api.service.js";
+import Answer from "@/components/Answer";
+import QuestionActions from "@/components/QuestionActions";
 export default {
-  name: 'Question',
+  name: "Question",
   components: {
     Answer,
-    QuestionActions,
+    QuestionActions
   },
   props: {
     slug: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
@@ -81,27 +88,32 @@ export default {
       showForm: false,
       next: null,
       loadingAnswers: false,
-      requestUser: null,
+      requestUser: null
     };
   },
   computed: {
     isQuestionAuthor() {
       return this.question.author === this.requestUser;
-    },
+    }
   },
   methods: {
     setPageTitle(title) {
       document.title = title;
     },
     setRequestUser() {
-      this.requestUser = window.localStorage.getItem('username');
+      this.requestUser = window.localStorage.getItem("username");
     },
     getQuestionData() {
       let endpoint = `/api/questions/${this.slug}/`;
       apiService(endpoint).then(data => {
-        this.question = data;
-        this.userHasAnswered = data.user_has_answered;
-        this.setPageTitle(data.content);
+        if (data) {
+          this.question = data;
+          this.userHasAnswered = data.user_has_answered;
+          this.setPageTitle(data.content);
+        } else {
+          this.question = null;
+          this.setPageTitle("404 - PageNotFound");
+        }
       });
     },
     getQuestionAnswers() {
@@ -122,9 +134,11 @@ export default {
     onSubmit() {
       if (this.newAnswerBody) {
         let endpoint = `/api/questions/${this.slug}/answer/`;
-        apiService(endpoint, 'POST', { body: this.newAnswerBody }).then(data => {
-          this.answers.unshift(data);
-        });
+        apiService(endpoint, "POST", { body: this.newAnswerBody }).then(
+          data => {
+            this.answers.unshift(data);
+          }
+        );
         this.newAnswerBody = null;
         this.showForm = false;
         this.userHasAnswered = true;
@@ -138,19 +152,21 @@ export default {
     async deleteAnswer(answer) {
       let endpoint = `/api/answers/${answer.id}/`;
       try {
-        await apiService(endpoint, 'DELETE');
-        this.answers = this.answers.filter((item, index) => index !== this.answers.indexOf(answer));
+        await apiService(endpoint, "DELETE");
+        this.answers = this.answers.filter(
+          (item, index) => index !== this.answers.indexOf(answer)
+        );
         this.userHasAnswered = false;
       } catch (e) {
-        console.log(e);
+        // console.log(e);
       }
-    },
+    }
   },
   created() {
     this.getQuestionData();
     this.getQuestionAnswers();
     this.setRequestUser();
-  },
+  }
 };
 </script>
 
@@ -166,5 +182,9 @@ export default {
 .error {
   font-weight: bold;
   color: red;
+}
+#notfound {
+  color: red;
+  text-align: center;
 }
 </style>

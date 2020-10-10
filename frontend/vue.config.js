@@ -6,11 +6,9 @@ module.exports = {
   outputDir: "./dist/",
 
   chainWebpack: config => {
-    config.plugin("BundleTracker").use(BundleTracker, [
-      {
-        filename: "./webpack-stats.json"
-      }
-    ]);
+    config.plugin("BundleTracker").use(BundleTracker, [{
+      filename: "./webpack-stats.json"
+    }]);
 
     config.output.filename("bundle.js");
 
@@ -32,13 +30,13 @@ module.exports = {
       .headers({
         "Access-Control-Allow-Origin": ["*"]
       });
-  }
+  },
 
   // uncomment before executing 'npm run build'
-  // css: {
-  //     extract: {
-  //       filename: 'bundle.css',
-  //       chunkFilename: 'bundle.css',
-  //     },
-  // }
+  css: {
+    extract: {
+      filename: 'bundle.css',
+      chunkFilename: 'bundle.css',
+    },
+  }
 };
